@@ -34,3 +34,7 @@ func SetupDatabaseConnection() {
 func SyncDatabase() {
 	DB.AutoMigrate(&models.User{})
 }
+
+func GetDB() *gorm.DB {
+	return DB
+}
