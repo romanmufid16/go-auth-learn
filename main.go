@@ -37,6 +37,8 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 	{
 		protected.GET("/current", userController.GetUserInfo)
+		protected.PUT("/update", userController.UpdateUser)
+		protected.DELETE("/:id/delete", userController.DeleteUser)
 	}
 
 	r.Run()

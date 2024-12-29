@@ -13,6 +13,8 @@ type UserService interface {
 	Register(userDTO *dto.RegisterUser) (*dto.UserResponse, error)
 	Login(userDTO *dto.LoginUser) (*dto.TokenResponse, error)
 	GetUser(id uint) (*dto.UserResponse, error)
+	UpdateUser(id uint, userDTO *dto.UpdateUser) (*dto.UserResponse, error)
+	DeleteUser(id uint) (bool, error)
 }
 
 type userService struct {
@@ -94,4 +96,50 @@ func (s *userService) GetUser(id uint) (*dto.UserResponse, error) {
 	}
 
 	return userResponse, nil
+}
+
+func (s *userService) UpdateUser(id uint, userDTO *dto.UpdateUser) (*dto.UserResponse, error) {
+	user, err := s.userRepo.GetById(id)
+	if err != nil {
+		return nil, errors.New("User Not found")
+	}
+
+	if userDTO.Name != "" {
+		user.Name = userDTO.Name
+	}
+
+	if userDTO.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userDTO.Password), 10)
+		if err != nil {
+			return nil, err
+		}
+		user.Password = string(hashedPassword)
+	}
+
+	updatedUser, err := s.userRepo.Update(user)
+	if err != nil {
+		return nil, err
+	}
+
+	userResponse := &dto.UserResponse{
+		ID:    updatedUser.ID,
+		Name:  updatedUser.Name,
+		Email: updatedUser.Email,
+	}
+
+	return userResponse, nil
+}
+
+func (s *userService) DeleteUser(id uint) (bool, error) {
+	_, err := s.userRepo.GetById(id)
+	if err != nil {
+		return false, errors.New("User not found")
+	}
+
+	err = s.userRepo.Delete(id)
+	if err != nil {
+		return false, errors.New("Delete failed")
+	}
+
+	return true, nil
 }

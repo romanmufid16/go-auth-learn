@@ -20,3 +20,8 @@ type UserResponse struct {
 type TokenResponse struct {
 	Token string `json:"token"`
 }
+
+type UpdateUser struct {
+	Name     string `json:"name" validate:"omitempty,min=1,max=100"`
+	Password string `json:"password" validate:"omitempty,min=6,max=100"`
+}
