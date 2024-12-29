@@ -6,8 +6,17 @@ type RegisterUser struct {
 	Password string `json:"password" validate:"required,min=6"`     // Validasi password harus ada dan panjangnya minimal 6 karakter
 }
 
+type LoginUser struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
 type UserResponse struct {
 	ID    uint   `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
+}
+
+type TokenResponse struct {
+	Token string `json:"token"`
 }

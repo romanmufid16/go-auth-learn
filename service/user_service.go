@@ -5,11 +5,13 @@ import (
 	"github.com/romanmufid16/go-auth-learn/dto"
 	"github.com/romanmufid16/go-auth-learn/models"
 	"github.com/romanmufid16/go-auth-learn/repository"
+	"github.com/romanmufid16/go-auth-learn/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
 	Register(userDTO *dto.RegisterUser) (*dto.UserResponse, error)
+	Login(userDTO *dto.LoginUser) (*dto.TokenResponse, error)
 }
 
 type userService struct {
@@ -52,4 +54,27 @@ func (s *userService) Register(userDTO *dto.RegisterUser) (*dto.UserResponse, er
 	}
 
 	return &userResponse, nil
+}
+
+func (s *userService) Login(userDTO *dto.LoginUser) (*dto.TokenResponse, error) {
+	existingUser, _ := s.userRepo.FindByEmail(userDTO.Email)
+	if existingUser == nil {
+		return nil, errors.New("Invalid credentials")
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(userDTO.Password))
+	if err != nil {
+		return nil, errors.New("Invalid credentials")
+	}
+
+	token, err := utils.GenerateToken(existingUser.ID, existingUser.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	tokenResponse := dto.TokenResponse{
+		Token: token,
+	}
+
+	return &tokenResponse, nil
 }
