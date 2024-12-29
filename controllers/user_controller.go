@@ -76,3 +76,32 @@ func (h *UserController) LoginController(c *gin.Context) {
 	response := utils.BuildResponse(true, "Login Successful", result)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *UserController) GetUserInfo(c *gin.Context) {
+	id, exists := c.Get("user_id")
+	if !exists {
+		errorResponse := utils.BuildErrorResponse("Unauthorized", "User ID not found in context", utils.EmptyObj{})
+		c.JSON(http.StatusUnauthorized, errorResponse)
+		return
+	}
+
+	// Lakukan type assertion untuk memastikan id adalah uint
+	userID, ok := id.(uint)
+	if !ok {
+		errorResponse := utils.BuildErrorResponse("Invalid Request", "Invalid user ID type", utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, errorResponse)
+		return
+	}
+
+	// Panggil UserService untuk mendapatkan data user berdasarkan userID
+	result, err := h.UserService.GetUser(userID)
+	if err != nil {
+		errorResponse := utils.BuildErrorResponse("Invalid Request", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, errorResponse)
+		return
+	}
+
+	// Response sukses jika user ditemukan
+	response := utils.BuildResponse(true, "Retrieved user data successfully", result)
+	c.JSON(http.StatusOK, response)
+}

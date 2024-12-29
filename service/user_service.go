@@ -12,6 +12,7 @@ import (
 type UserService interface {
 	Register(userDTO *dto.RegisterUser) (*dto.UserResponse, error)
 	Login(userDTO *dto.LoginUser) (*dto.TokenResponse, error)
+	GetUser(id uint) (*dto.UserResponse, error)
 }
 
 type userService struct {
@@ -77,4 +78,20 @@ func (s *userService) Login(userDTO *dto.LoginUser) (*dto.TokenResponse, error) 
 	}
 
 	return &tokenResponse, nil
+}
+
+func (s *userService) GetUser(id uint) (*dto.UserResponse, error) {
+	user, err := s.userRepo.GetById(id)
+	if err != nil {
+		return nil, errors.New("User not found")
+	}
+
+	// Transformasi ke DTO
+	userResponse := &dto.UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	}
+
+	return userResponse, nil
 }
